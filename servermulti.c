@@ -86,7 +86,7 @@ int main() {
             for (i = 0; i < max_clients; i++) {
                 if (client_socket[i] == 0) {
                     client_socket[i] = new_socket;
-                    printf("Adding to list of sockets as %d\n", i);
+                    printf("Waiting for new Clients ... %d\n", i);
                     break;
                 }
             }

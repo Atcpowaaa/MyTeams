@@ -7,7 +7,7 @@
 int main(int argc, char **argv) {
 
     int socket1;
-    char message[2000]; // Déclarer une variable pour stocker le message
+    char message[2000];
     char server_reply[2000];
     struct sockaddr_in server;
     int boucle = 1;

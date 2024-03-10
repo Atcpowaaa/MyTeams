@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <errno.h> // Inclure pour utiliser 'errno' et identifier les erreurs
+#include <errno.h> // Pour utiliser 'errno' et identifier les erreurs
 
 #define PORT 4242 // Définir le port d'écoute du serveur
 #define BUFFER_SIZE 1024 // Taille du buffer pour les messages entrants
@@ -30,7 +30,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // Définir l'adresse du serveur
+    // Définir l'adresse du serveur pour écouter sur l'interface locale
     address.sin_family = AF_INET; // Type d'adresse
     address.sin_addr.s_addr = inet_addr("127.0.0.1");
     address.sin_port = htons(PORT); // Port d'écoute
@@ -40,14 +40,13 @@ int main() {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    
-    // Ajouter le code ici pour afficher l'adresse IP et le port après la liaison
-    addrlen = sizeof(address); // Assurez-vous que addrlen est initialisé correctement
+
+    // Récupérer et afficher l'adresse IP locale et le port sur lesquels le serveur est lié
+    addrlen = sizeof(address);
     if (getsockname(server_fd, (struct sockaddr *)&address, &addrlen) == -1) {
-    	perror("getsockname"); // Si getsockname échoue, affichez l'erreur
+        perror("getsockname");
         exit(EXIT_FAILURE);
     }
-
     printf("Server started on IP %s, port %d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
     // Marquer le socket comme un socket d'écoute pour les connexions entrantes
@@ -56,7 +55,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    printf("Listener on port %d \n", PORT);
+    printf("Waiting for new clients...\n");
     
     // Boucle principale du serveur
     while(1) {
@@ -89,7 +88,7 @@ int main() {
             }
             
             // Informer de la nouvelle connexion
-            printf("New connection , socket fd is %d , ip is : %s , port : %d \n", new_socket, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+            printf("New connection, socket fd is %d, IP is: %s, port: %d\n", new_socket, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
         
             // Ajouter le nouveau socket à l'ensemble des sockets clients
             for (i = 0; i < max_clients; i++) {
@@ -105,16 +104,19 @@ int main() {
             sd = client_socket[i];
             
             if (FD_ISSET(sd, &readfds)) {
-                if ((valread = read(sd, buffer, BUFFER_SIZE)) == 0) {
+                // Vider le buffer avant de lire les nouveaux messages
+                memset(buffer, 0, BUFFER_SIZE);
+                valread = read(sd, buffer, BUFFER_SIZE - 1);
+                if (valread == 0) {
                     // Si le client est déconnecté
                     getpeername(sd, (struct sockaddr*)&address, &addrlen);
-                    printf("Host disconnected, ip %s, port %d \n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+                    printf("Host disconnected, IP %s, port %d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
                     
                     close(sd);
                     client_socket[i] = 0;
                 } else {
                     // Afficher le message reçu
-                    buffer[valread] = '\0';
+                    buffer[valread] = '\0'; // Assurez-vous que le message est terminé par un caractère nul
                     printf("Client %d: %s\n", i, buffer);
                 }
             }

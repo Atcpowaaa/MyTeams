@@ -7,9 +7,10 @@
 int main(int argc, char **argv) {
 
     int socket1;
-    char* message = "test";
+    char message[2000]; // Déclarer une variable pour stocker le message
     char server_reply[2000];
     struct sockaddr_in server;
+    int boucle = 1;
 
     // Création du socket
     socket1 = socket(AF_INET, SOCK_STREAM, 0); // AF_INET = IPv4, SOCK_STREAM = TCP
@@ -30,22 +31,29 @@ int main(int argc, char **argv) {
     }
 
     puts("Connecté");
+    
+    while (boucle==1){
 
-    // Envoi du message
-    message = "GET / HTTP/1.1\r\n\r\n";
-    if (send(socket1, message, strlen(message), 0) < 0) {
-        puts("Erreur pendant l'envoi du message\n");
-        return 1;
+	    // Saisie utilisateur du message à envoyer
+	    printf("Entrez votre message : ");
+	    fgets(message, sizeof(message), stdin);
+
+	    // Envoi du message
+	    if (send(socket1, message, strlen(message), 0) < 0) {
+		puts("Erreur pendant l'envoi du message\n");
+		return 1;
+	    }
+
+	    // Réception de la réponse du serveur
+	    if (recv(socket1, server_reply, sizeof(server_reply), 0) < 0) {
+		puts("Erreur de la réponse serveur");
+		return 1;
+	    }
+
+	    puts("Réponse reçue\n");
+	    puts(server_reply);
+	    
     }
-
-    // Réception de la réponse du serveur
-    if (recv(socket1, server_reply, 2000, 0) < 0) {
-        puts("Erreur de la réponse serveur");
-        return 1;
-    }
-
-    puts("Réponse reçue\n");
-    puts(server_reply);
 
     // Fermeture du socket
     close(socket1);

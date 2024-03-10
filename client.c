@@ -32,27 +32,34 @@ int main(int argc, char **argv) {
 
     puts("Connecté");
     
+    if (recv(socket1, server_reply, sizeof(server_reply), 0) < 0) {
+	puts("Erreur de la réponse serveur");
+	return 1;
+    }
+
+    puts(server_reply);
+
     while (boucle==1){
 
-	    // Saisie utilisateur du message à envoyer
-	    printf("Entrez votre message : ");
-	    fgets(message, sizeof(message), stdin);
+            // Le user envoie ses messages ici
+            printf("Entrez votre message : ");
+            fgets(message, sizeof(message), stdin);
 
-	    // Envoi du message
-	    if (send(socket1, message, strlen(message), 0) < 0) {
-		puts("Erreur pendant l'envoi du message\n");
-		return 1;
-	    }
-
-	    // Réception de la réponse du serveur
+            // Envoi du message
+            if (send(socket1, message, strlen(message), 0) < 0) {
+                puts("Erreur pendant l'envoi du message\n");
+                return 1;
+            }
+            
+            // Réception de la réponse du serveur
 	    if (recv(socket1, server_reply, sizeof(server_reply), 0) < 0) {
 		puts("Erreur de la réponse serveur");
 		return 1;
 	    }
 
-	    puts("Réponse reçue\n");
 	    puts(server_reply);
-	    
+
+
     }
 
     // Fermeture du socket

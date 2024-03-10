@@ -32,7 +32,7 @@ int main() {
 
     // Définir l'adresse du serveur
     address.sin_family = AF_INET; // Type d'adresse
-    address.sin_addr.s_addr = INADDR_ANY; // Accepter toutes les adresses entrantes
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
     address.sin_port = htons(PORT); // Port d'écoute
 
     // Lier le socket à l'adresse et au port spécifiés
@@ -40,6 +40,15 @@ int main() {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
+    
+    // Ajouter le code ici pour afficher l'adresse IP et le port après la liaison
+    addrlen = sizeof(address); // Assurez-vous que addrlen est initialisé correctement
+    if (getsockname(server_fd, (struct sockaddr *)&address, &addrlen) == -1) {
+    	perror("getsockname"); // Si getsockname échoue, affichez l'erreur
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server started on IP %s, port %d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
     // Marquer le socket comme un socket d'écoute pour les connexions entrantes
     if (listen(server_fd, 3) < 0) {
@@ -114,4 +123,3 @@ int main() {
     
     return 0;
 }
-
